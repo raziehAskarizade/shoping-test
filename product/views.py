@@ -72,25 +72,28 @@ def addOrder(request):
                 user=user,
                 total_price=data['total_price'],
             )
-
     for all_orders in orderItem:
         product = Products.objects.get(id=all_orders['product'])
-        if OrderItem.objects.get(title=product.title) != "":
-            OrderItem.objects.filter(title=product.title).update(
-                quantity=all_orders['quantity'] + OrderItem.objects.get(title=product.title).quantity)
-            product.quantity -= all_orders['quantity']
+        if product.quantity - all_orders['quantity'] >= 0:
+            try:
+                if OrderItem.objects.get(order=order, title=product.title) != "":
+                    OrderItem.objects.filter(order=order, title=product.title).update(
+                        quantity=all_orders['quantity'] + OrderItem.objects.get(order=order,
+                                                                                title=product.title).quantity)
+                    product.quantity -= all_orders['quantity']
+            except:
+                item = OrderItem.objects.create(
+                    product=product,
+                    order=order,
+                    title=product.title,
+                    quantity=all_orders['quantity'],
+                    price=all_orders['price'],
+                    image=product.image.url,
+                )
+                product.quantity -= item.quantity
+            product.save()
         else:
-            item = OrderItem.objects.create(
-                product=product,
-                order=order,
-                title=product.title,
-                quantity=all_orders['quantity'],
-                price=all_orders['price'],
-                image=product.image.url,
-            )
-            product.quantity -= item.quantity
-        product.save()
-
+            return Response({'detail': 'موجودی کالا کافی نیست'}, status=status.HTTP_400_BAD_REQUEST)
     return Response(OrderSerializer(order, many=False).data)
 
 
