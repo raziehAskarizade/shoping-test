@@ -22,6 +22,7 @@ class Order(models.Model):
     id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     total_price = models.FloatField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.user)
