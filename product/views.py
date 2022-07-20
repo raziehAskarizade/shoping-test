@@ -76,9 +76,9 @@ def addOrder(request):
     for all_orders in orderItem:
         product = Products.objects.get(id=all_orders['product'])
         if OrderItem.objects.get(title=product.title) != "":
-            item = OrderItem.objects.filter(title=product.title).update(
+            OrderItem.objects.filter(title=product.title).update(
                 quantity=all_orders['quantity'] + OrderItem.objects.get(title=product.title).quantity)
-            product.quantity -= item
+            product.quantity -= all_orders['quantity']
         else:
             item = OrderItem.objects.create(
                 product=product,
